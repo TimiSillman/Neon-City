@@ -6,21 +6,25 @@ public class PlayerController : MonoBehaviour
 {
     public float speed = 6.0F;
     public float jumpForce = 8.0F;
-    public float verticalVelocity;
+    public float wallJumpSpeed = -0.7f;
 
 
     //Private Variables
     Vector3 moveDirection = Vector3.zero;
     CharacterController controller;
-    float gravity = 20.0F;
-    Vector3 moveVector;
+    float gravity = 30.0F;
 
     private void Start()
     {
         controller = GetComponent<CharacterController>();
     }
 
-    void Update()
+    void FixedUpdate()
+    {
+        Movement();
+    }
+
+    void Movement()
     {
         if (controller.isGrounded)
         {
@@ -32,6 +36,7 @@ public class PlayerController : MonoBehaviour
                 moveDirection.y = jumpForce;
 
         }
+
         moveDirection.y -= gravity * Time.deltaTime;
         controller.Move(moveDirection * Time.deltaTime);
     }
@@ -42,11 +47,11 @@ public class PlayerController : MonoBehaviour
         if (!controller.isGrounded && hit.normal.y < 0.1f)
         {
 
-            if (Input.GetButton("Jump"))
+            if (Input.GetButtonDown("Jump"))
             {
                 Debug.Log("HIT");
-                verticalVelocity = jumpForce;
-                moveVector = hit.normal * speed;
+                moveDirection.y = jumpForce;
+                moveDirection.x = moveDirection.x * wallJumpSpeed;
             }
         }
     }
