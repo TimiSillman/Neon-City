@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController2 : MonoBehaviour {
+public class PlayerController2 : MonoBehaviour
+{
 
-    public float groundSpeed = 3f;
-    public float airSpeed = 2f;
-    public float gravityStrength = 5f;
-    public float jumpForce = 10f;
+    public float groundSpeed = 10;
+    public float airSpeed = 10;
+    public float gravityStrength = 40;
+    public float jumpForce = 20;
+    public float wallClimbCD = 2;
 
     bool canJump = false;
     float verticalVelocity;
@@ -15,16 +17,19 @@ public class PlayerController2 : MonoBehaviour {
     Vector3 groundedVelocity;
     Vector3 normal;
     bool onWall = false;
+    bool climbedUp = false;
 
     CharacterController cc;
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start()
+    {
         cc = this.GetComponent<CharacterController>();
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
 
         Vector3 playerVector = Vector3.zero;
         Vector3 input = Vector3.zero;
@@ -39,7 +44,8 @@ public class PlayerController2 : MonoBehaviour {
             playerVector = input;
             playerVector *= groundSpeed;
 
-        } else
+        }
+        else
         {
             //If in air, the speed is set by airSpeed variable * the Vector 3 input
             playerVector = groundedVelocity;
@@ -62,12 +68,20 @@ public class PlayerController2 : MonoBehaviour {
                 Vector3 reflection = Vector3.Reflect(velocity, normal);
                 Vector3 projected = Vector3.ProjectOnPlane(reflection, Vector3.up);
                 groundedVelocity = projected.normalized * groundSpeed + normal * airSpeed;
+
             }
             if (canJump)
             {
                 //basic jump
                 verticalVelocity = jumpForce;
-            }         
+            }
+        }
+
+        if (Input.GetButton("Climb") && !climbedUp && onWall)
+        {
+
+            verticalVelocity = jumpForce;
+            StartCoroutine(wait());
         }
 
         playerVector.y = verticalVelocity * Time.deltaTime;
@@ -85,7 +99,8 @@ public class PlayerController2 : MonoBehaviour {
             verticalVelocity = -3f;
             onWall = false;
         }
-        else if ((flags & CollisionFlags.Sides) != 0) {
+        else if ((flags & CollisionFlags.Sides) != 0)
+        {
 
             canJump = true;
             onWall = true;
@@ -102,6 +117,15 @@ public class PlayerController2 : MonoBehaviour {
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         //Gets the Vector value for the hitpoint
-        normal = hit.normal;  
+        normal = hit.normal;
     }
+
+
+    IEnumerator wait()
+    {
+        climbedUp = true;
+        yield return new WaitForSeconds(wallClimbCD);
+        climbedUp = false;
+    }
+
 }
