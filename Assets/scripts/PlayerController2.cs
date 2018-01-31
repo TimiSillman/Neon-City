@@ -13,10 +13,8 @@ public class PlayerController2 : MonoBehaviour
 
     bool canJump = false;
     float verticalVelocity;
-    Vector3 velocity;
-    public Vector3 groundedVelocity;
-    Vector3 normal;
-    Vector3 playerVector;
+    public Vector3 velocity;
+    public Vector3 playerVector;
     bool onWall = false;
     bool climbedUp = false;
 
@@ -49,8 +47,8 @@ public class PlayerController2 : MonoBehaviour
         else
         {
             //If in air, the speed is set by airSpeed variable * the Vector 3 input
-            playerVector = groundedVelocity;
-            playerVector += (input * 3) * airSpeed;
+            playerVector = input;
+            playerVector *= airSpeed;
         } 
 
         //clamp the speed so it does not go over the ground speed level (no BHOP)
@@ -70,13 +68,6 @@ public class PlayerController2 : MonoBehaviour
             {
                 //basic jump
                 verticalVelocity = jumpForce;
-            }
-            if (onWall)
-            {
-                Vector3 reflection = Vector3.Reflect(velocity, normal);
-                Vector3 projected = Vector3.ProjectOnPlane(reflection, Vector3.up);
-                groundedVelocity = projected.normalized * airSpeed + normal * airSpeed;
-
             }
         }
 
@@ -104,7 +95,7 @@ public class PlayerController2 : MonoBehaviour
         //set canjump to true
         if ((flags & CollisionFlags.Below) != 0)
         {
-            groundedVelocity = Vector3.ProjectOnPlane(velocity, Vector3.up);
+            playerVector = Vector3.ProjectOnPlane(velocity, Vector3.up);
             canJump = true;
 
             verticalVelocity = -3f;
@@ -131,7 +122,19 @@ public class PlayerController2 : MonoBehaviour
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         //Gets the Vector value for the hitpoint
-        normal = hit.normal;
+
+        if (!cc.isGrounded && hit.normal.y < 0.1f)
+        {
+            if (Input.GetButtonDown("Jump"))
+            {
+
+                //LISÄÄ TÄHÄN VITUNMOINEN FORCE
+                Debug.Log("HIT");
+                playerVector.y = jumpForce;
+                playerVector = Vector3.forward * airSpeed * hit.normal.x;
+            }
+
+        }
     }
 
 
