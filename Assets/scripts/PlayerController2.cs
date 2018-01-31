@@ -14,8 +14,9 @@ public class PlayerController2 : MonoBehaviour
     bool canJump = false;
     float verticalVelocity;
     Vector3 velocity;
-    Vector3 groundedVelocity;
+    public Vector3 groundedVelocity;
     Vector3 normal;
+    Vector3 playerVector;
     bool onWall = false;
     bool climbedUp = false;
 
@@ -28,10 +29,10 @@ public class PlayerController2 : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
 
-        Vector3 playerVector = Vector3.zero;
+        playerVector = Vector3.zero;
         Vector3 input = Vector3.zero;
 
         //get input
@@ -49,33 +50,36 @@ public class PlayerController2 : MonoBehaviour
         {
             //If in air, the speed is set by airSpeed variable * the Vector 3 input
             playerVector = groundedVelocity;
-            playerVector += input * airSpeed;
-        }
+            playerVector += (input * 3) * airSpeed;
+        } 
 
         //clamp the speed so it does not go over the ground speed level (no BHOP)
-        playerVector = Vector3.ClampMagnitude(playerVector, groundSpeed);
+        playerVector = Vector3.ClampMagnitude(playerVector, airSpeed);
         playerVector *= Time.deltaTime;
 
 
 
         verticalVelocity -= (gravityStrength * Time.deltaTime);
-
-        if (Input.GetButton("Jump"))
+        
+        if (Input.GetButtonDown("Jump"))
         {
             //If touching wall, ability to double jump into an arc
-            if (onWall)
-            {
-                Vector3 reflection = Vector3.Reflect(velocity, normal);
-                Vector3 projected = Vector3.ProjectOnPlane(reflection, Vector3.up);
-                groundedVelocity = projected.normalized * groundSpeed + normal * airSpeed;
 
-            }
-            if (canJump)
+
+            if (canJump || cc.isGrounded)
             {
                 //basic jump
                 verticalVelocity = jumpForce;
             }
+            if (onWall)
+            {
+                Vector3 reflection = Vector3.Reflect(velocity, normal);
+                Vector3 projected = Vector3.ProjectOnPlane(reflection, Vector3.up);
+                groundedVelocity = projected.normalized * airSpeed + normal * airSpeed;
+
+            }
         }
+
 
         if (Input.GetButton("Climb") && !climbedUp && onWall)
         {
@@ -83,9 +87,15 @@ public class PlayerController2 : MonoBehaviour
             verticalVelocity = jumpForce;
             StartCoroutine(wait());
         }
-
-        playerVector.y = verticalVelocity * Time.deltaTime;
-
+        
+        if (cc.velocity.y < 0)
+        {
+            playerVector.y = verticalVelocity * Time.deltaTime * 1.8f;
+        }
+        else
+        {
+            playerVector.y = verticalVelocity * Time.deltaTime;
+        }
         //EI VITTU MITÄÄ HAJUA
         CollisionFlags flags = cc.Move(playerVector);
         velocity = playerVector / Time.deltaTime;
@@ -96,7 +106,9 @@ public class PlayerController2 : MonoBehaviour
         {
             groundedVelocity = Vector3.ProjectOnPlane(velocity, Vector3.up);
             canJump = true;
+
             verticalVelocity = -3f;
+
             onWall = false;
         }
         else if ((flags & CollisionFlags.Sides) != 0)
@@ -104,6 +116,8 @@ public class PlayerController2 : MonoBehaviour
 
             canJump = true;
             onWall = true;
+        }else if((flags & CollisionFlags.Above) != 0){
+            verticalVelocity = -1.5f;
         }
         else
         {
