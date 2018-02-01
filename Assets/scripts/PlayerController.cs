@@ -4,71 +4,224 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float speed = 20;
-    public float jumpForce = 15;
-    public float wallJumpSpeed = -1f;
-    public float speedSmooth;
+    //Player Movement Public Variables
+    public float groundSpeed = 10;
+    public float airSpeed = 10;
+    public float gravityStrength = 40;
+    public float jumpForce = 20;
+    public float wallClimbCD = 2;
 
-    //Private Variables
-    public Vector3 moveDirection = Vector3.zero;
-    CharacterController controller;
-    float gravity = 30f;
-    Vector3 currentSpeed = Vector3.zero;
+    //Player movement private variables
+    bool canJump = false;
+    float verticalVelocity;
+    public Vector3 velocity;
+    public Vector3 playerVector;
+    bool onWall = false;
+    bool climbedUp = false;
+    CharacterController cc;
 
-    private void Start()
+    //Player Actions Public Variables
+    public Transform firePoint;
+    public Weapon weapon;
+
+    //Player Actions Private Variables
+    public bool fireRateCooldown = false;
+
+
+    // Use this for initialization
+    void Start()
     {
-        controller = GetComponent<CharacterController>();
+        cc = this.GetComponent<CharacterController>();
     }
 
+    void Update()
+    {
+        if (weapon != null && !fireRateCooldown)
+        {
+            if (weapon.isRapidFire)
+            {
+                if (Input.GetButton("Fire1"))
+                {
+                    Fire();
+                }
+            }
+            else if (!weapon.isRapidFire)
+            {
+                if (Input.GetButtonDown("Fire1"))
+                {
+                    Fire();
+                }
+            }
+
+        }
+    }
+
+    // Update is called once per frame
     void FixedUpdate()
     {
+
         Movement();
+        LookAtMouse();
+    }
+
+    void LookAtMouse()
+    {
+        var mouse = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+        var playerScreenPoint = Camera.main.WorldToScreenPoint(this.transform.position);
+        if (mouse.x < playerScreenPoint.x)
+        {
+            //mouse is on the left side of the player
+            this.gameObject.transform.localScale = new Vector3(-1,1,1);
+        }
+        else if (mouse.x > playerScreenPoint.x)
+        {
+            //mouse is on the right side of the player
+            this.gameObject.transform.localScale = new Vector3(1, 1, 1);
+        }
     }
 
     void Movement()
     {
+        playerVector = Vector3.zero;
+        Vector3 input = Vector3.zero;
 
-        if (controller.isGrounded)
+        //get input
+        input.x = Input.GetAxis("Horizontal");
+        input = Vector3.ClampMagnitude(input, 1f);
+
+        if (cc.isGrounded)
         {
-            moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0, 0);
-            moveDirection = transform.TransformDirection(moveDirection);
-            moveDirection.x *= speed;
-            if (Input.GetButton("Jump"))
-            {
-                moveDirection.y = jumpForce;
-            }
-            
-        } else if (!controller.isGrounded)
+            //if grounded, get the basic input the player gives with the basic ground speed
+            playerVector = input;
+            playerVector *= groundSpeed;
+
+        }
+        else
         {
-            if (Input.GetButton("Horizontal"))
+            //If in air, the speed is set by airSpeed variable * the Vector 3 input
+            playerVector = input;
+            playerVector *= airSpeed;
+        }
+
+        //clamp the speed so it does not go over the ground speed level (no BHOP)
+        playerVector = Vector3.ClampMagnitude(playerVector, airSpeed);
+        playerVector *= Time.deltaTime;
+
+
+
+        verticalVelocity -= (gravityStrength * Time.deltaTime);
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            //If touching wall, ability to double jump into an arc
+
+
+            if (canJump || cc.isGrounded)
             {
-                moveDirection.x = Input.GetAxis("Horizontal");
-                moveDirection = transform.TransformDirection(moveDirection);
-                moveDirection.x *= speed;
+                //basic jump
+                verticalVelocity = jumpForce;
             }
         }
 
 
-        moveDirection.y -= gravity * Time.deltaTime;
-        controller.Move(moveDirection * Time.deltaTime);
-        currentSpeed = moveDirection;
+        if (Input.GetButton("Climb") && !climbedUp && onWall)
+        {
+
+            verticalVelocity = jumpForce;
+            StartCoroutine(wait());
+        }
+
+        if (cc.velocity.y < 0)
+        {
+            playerVector.y = verticalVelocity * Time.deltaTime * 1.8f;
+        }
+        else
+        {
+            playerVector.y = verticalVelocity * Time.deltaTime;
+        }
+        //EI VITTU MITÄÄ HAJUA
+        CollisionFlags flags = cc.Move(playerVector);
+        velocity = playerVector / Time.deltaTime;
+        //use of flags to determine if character can jump or not
+        //if on ground
+        //set canjump to true
+        if ((flags & CollisionFlags.Below) != 0)
+        {
+            playerVector = Vector3.ProjectOnPlane(velocity, Vector3.up);
+            canJump = true;
+
+            verticalVelocity = -3f;
+
+            onWall = false;
+        }
+        else if ((flags & CollisionFlags.Sides) != 0)
+        {
+
+            canJump = true;
+            onWall = true;
+        }
+        else if ((flags & CollisionFlags.Above) != 0)
+        {
+            verticalVelocity = -1.5f;
+        }
+        else
+        {
+            canJump = false;
+            onWall = false;
+        }
+    }
+
+
+    void Fire()
+    {
+        if (weapon.ammo > 0)
+        {
+            var bullet = Instantiate(weapon.bullet, firePoint.position, firePoint.rotation);
+            bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * weapon.projectileSpeed;
+
+            weapon.ammo -= 1;
+            fireRateCD(weapon.fireRate);
+
+        } else
+        {
+            //throw the weapon to hell
+            weapon = null;
+        }
+
     }
 
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
- 
+        //Gets the Vector value for the hitpoint
 
-        if (!controller.isGrounded && hit.normal.y < 0.1f)
+        if (!cc.isGrounded && hit.normal.y < 0.1f)
         {
             if (Input.GetButtonDown("Jump"))
             {
+
+                //LISÄÄ TÄHÄN VITUNMOINEN FORCE
                 Debug.Log("HIT");
-                moveDirection.y = jumpForce;
-                moveDirection.x *= wallJumpSpeed;
+                playerVector.y = jumpForce;
+                playerVector = Vector3.forward * airSpeed * hit.normal.x;
             }
-            
+
         }
+    }
+
+
+    IEnumerator fireRateCD(float amount)
+    {
+        fireRateCooldown = true;
+        yield return new WaitForSeconds(amount);
+        fireRateCooldown = false;
+    }
+
+    IEnumerator wait()
+    {
+        climbedUp = true;
+        yield return new WaitForSeconds(wallClimbCD);
+        climbedUp = false;
     }
 
 }
