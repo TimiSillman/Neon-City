@@ -5,6 +5,7 @@ using UnityEngine;
 public class Weapon : ScriptableObject {
 
     new public string name = "Name";
+    public GameObject mesh;
     public float damage;
     public float ammo;
     public float fireRate;

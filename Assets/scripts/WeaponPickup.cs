@@ -10,7 +10,6 @@ public class WeaponPickup : Interactable {
     public override void Interact()
     {
         base.Interact();
-
         PickUp();
     }
 
@@ -18,11 +17,17 @@ public class WeaponPickup : Interactable {
     {
         Debug.Log("Picking up: " + weapon.name);
         //Add item to players "hands"
-        foreach (PlayerAttack player in FindObjectsOfType<PlayerAttack>())
+        foreach (PlayerController player in FindObjectsOfType<PlayerController>())
         {
             if (player.gameObject == collidingPlayer)
             {
+                if (player.weapon != null)
+                {
+                    player.RemoveWeapon();
+                }
                 player.weapon = weapon;
+                player.weaponAmmo = weapon.ammo;
+                player.addWeaponToHand();
             }
         }
         Destroy(gameObject);

@@ -23,6 +23,8 @@ public class PlayerController : MonoBehaviour
     //Player Actions Public Variables
     public Transform firePoint;
     public Weapon weapon;
+    public float weaponAmmo;
+    public Transform weaponLocation;
 
     //Player Actions Private Variables
     public bool fireRateCooldown = false;
@@ -38,6 +40,7 @@ public class PlayerController : MonoBehaviour
     {
         if (weapon != null && !fireRateCooldown)
         {
+
             if (weapon.isRapidFire)
             {
                 if (Input.GetButton("Fire1"))
@@ -53,6 +56,11 @@ public class PlayerController : MonoBehaviour
                 }
             }
 
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            RemoveWeapon();
         }
     }
 
@@ -174,20 +182,17 @@ public class PlayerController : MonoBehaviour
 
     void Fire()
     {
-        if (weapon.ammo > 0)
+        if (weaponAmmo > 0)
         {
             var bullet = Instantiate(weapon.bullet, firePoint.position, firePoint.rotation);
             bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * weapon.projectileSpeed;
 
-            weapon.ammo -= 1;
-            fireRateCD(weapon.fireRate);
-
+            weaponAmmo -= 1;
+            StartCoroutine(fireRateCD(weapon.fireRate));
         } else
         {
-            //throw the weapon to hell
-            weapon = null;
+            RemoveWeapon();
         }
-
     }
 
 
@@ -224,4 +229,26 @@ public class PlayerController : MonoBehaviour
         climbedUp = false;
     }
 
+
+    public void addWeaponToHand()
+    {
+        var newWeapon = Instantiate(weapon.mesh, weaponLocation.position, weaponLocation.rotation);
+
+        if (this.gameObject.transform.localScale.x <= 0f)
+        {
+            newWeapon.transform.localScale = new Vector3(newWeapon.transform.localScale.x * -1, newWeapon.transform.localScale.y, newWeapon.transform.localScale.z);
+        }
+
+        newWeapon.transform.parent = weaponLocation;
+    }
+
+    public void RemoveWeapon()
+    {
+        weapon = null;
+        GameObject wep = GetComponentInChildren<WeaponDestroy>().gameObject;
+        wep.GetComponent<Rigidbody>().isKinematic = false;
+        wep.GetComponent<Rigidbody>().useGravity = true;
+        wep.GetComponent<BoxCollider>().enabled = true;
+        wep.transform.parent = null;
+    }
 }
