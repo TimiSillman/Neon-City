@@ -19,10 +19,21 @@ public class PlayerController : MonoBehaviour
     bool onWall = false;
     bool climbedUp = false;
     CharacterController cc;
+    public float speed = 10.0f;
+    public float jumpSpeed = 20.0f;
+    public float gravity = 20.0f;
+    public float jumpCount = 0.0f;
+    float maxJump = 2.0f;
+    Vector3 lastMove;
+
+    bool sliding = false;
+    bool wallJumped = false;
+    public Vector3 moveDirection = Vector3.zero;
 
     //Player Actions Public Variables
     public Transform firePoint;
     public Weapon weapon;
+    public float wallJumpCD = 0.5f;
 
     //Player Actions Private Variables
     public bool fireRateCooldown = false;
@@ -60,7 +71,7 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
 
-        Movement();
+        Movement1();
         LookAtMouse();
     }
 
@@ -79,7 +90,45 @@ public class PlayerController : MonoBehaviour
             this.gameObject.transform.localScale = new Vector3(1, 1, 1);
         }
     }
+    void Movement1()
+    {
+        cc.Move(moveDirection * Time.deltaTime);
 
+
+        if ((cc.collisionFlags & CollisionFlags.Below) != 0)
+        {
+            wallJumped = false;
+            moveDirection = new Vector3(Input.GetAxis("Horizontal") * speed, 0.0f);
+            if (Input.GetButtonDown("Jump"))
+            {
+                moveDirection.y = jumpSpeed;
+
+            }
+          moveDirection.y -= gravity * Time.deltaTime * 10f;
+        }
+
+        else
+        {
+            if (wallJumped == false)
+            {
+                moveDirection.x = Input.GetAxis("Horizontal") * speed;
+            }
+            if (cc.velocity.y < 0)
+            {
+                moveDirection.y -= gravity * Time.deltaTime * 1.8f;
+            }
+            else
+            {
+                moveDirection.y -= gravity * Time.deltaTime;
+            }
+
+
+        }
+
+
+
+
+    }
     void Movement()
     {
         playerVector = Vector3.zero;
@@ -189,23 +238,19 @@ public class PlayerController : MonoBehaviour
         }
 
     }
-
-
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        //Gets the Vector value for the hitpoint
-
-        if (!cc.isGrounded && hit.normal.y < 0.1f)
+        if(!cc.isGrounded && hit.normal.y < 0.1f)
         {
+            if(Input.GetAxisRaw("Horizontal") == 1 || Input.GetAxisRaw("Horizontal") == -1)
+            moveDirection.y *= 0.5f;
             if (Input.GetButtonDown("Jump"))
             {
-
-                //LISÄÄ TÄHÄN VITUNMOINEN FORCE
-                Debug.Log("HIT");
-                playerVector.y = jumpForce;
-                playerVector = Vector3.forward * airSpeed * hit.normal.x;
+                wallJumped = true;
+                StartCoroutine(wait());
+                moveDirection.y = jumpSpeed;
+                moveDirection.x = speed  * hit.normal.x;
             }
-
         }
     }
 
@@ -219,9 +264,8 @@ public class PlayerController : MonoBehaviour
 
     IEnumerator wait()
     {
-        climbedUp = true;
-        yield return new WaitForSeconds(wallClimbCD);
-        climbedUp = false;
+        yield return new WaitForSeconds(wallJumpCD);
+        wallJumped = false;
     }
 
 }
