@@ -29,6 +29,7 @@ public class PlayerController : MonoBehaviour
     bool sliding = false;
     bool wallJumped = false;
     public Vector3 moveDirection = Vector3.zero;
+    public Vector3 lastDirection;
 
     //Player Actions Public Variables
     public Transform firePoint;
@@ -98,6 +99,7 @@ public class PlayerController : MonoBehaviour
         if ((cc.collisionFlags & CollisionFlags.Below) != 0)
         {
             wallJumped = false;
+
             moveDirection = new Vector3(Input.GetAxis("Horizontal") * speed, 0.0f);
             if (Input.GetButtonDown("Jump"))
             {
@@ -111,7 +113,14 @@ public class PlayerController : MonoBehaviour
         {
             if (wallJumped == false)
             {
-                moveDirection.x = Input.GetAxis("Horizontal") * speed;
+                if (Input.GetAxisRaw("Horizontal") == 0)
+                {
+                    moveDirection = lastDirection;
+                }
+                else
+                {
+                    moveDirection.x = Input.GetAxis("Horizontal") * speed;
+                }
             }
 
             if (cc.velocity.y < 0)
@@ -126,7 +135,7 @@ public class PlayerController : MonoBehaviour
 
         }
 
-
+        lastDirection = cc.velocity;
 
 
     }
