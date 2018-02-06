@@ -1140,7 +1140,7 @@ MonoBehaviour:
   moveDirection: {x: 0, y: 0, z: 0}
   firePoint: {fileID: 0}
   weapon: {fileID: 0}
-  wallJumpCD: 0.5
+  wallJumpCD: 0.2
   fireRateCooldown: 0
 --- !u!114 &1060030626
 MonoBehaviour:

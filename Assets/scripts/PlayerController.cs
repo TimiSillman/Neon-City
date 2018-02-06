@@ -113,6 +113,7 @@ public class PlayerController : MonoBehaviour
             {
                 moveDirection.x = Input.GetAxis("Horizontal") * speed;
             }
+
             if (cc.velocity.y < 0)
             {
                 moveDirection.y -= gravity * Time.deltaTime * 1.8f;
@@ -266,6 +267,8 @@ public class PlayerController : MonoBehaviour
     {
         yield return new WaitForSeconds(wallJumpCD);
         wallJumped = false;
+        Debug.Log(cc.velocity);
+        
     }
 
 }
