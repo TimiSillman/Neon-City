@@ -5,19 +5,13 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     //Player Movement Public Variables
-    public float groundSpeed = 10;
-    public float airSpeed = 10;
-    public float gravityStrength = 40;
-    public float jumpForce = 20;
-    public float wallClimbCD = 2;
-
-    //Player movement private variables
-    bool canJump = false;
-    float verticalVelocity;
-    public Vector3 velocity;
-    public Vector3 playerVector;
-    bool onWall = false;
-    bool climbedUp = false;
+    float speed = 15;
+    float jumpSpeed = 20;
+    float gravity = 30;
+    float walljumpCD = 0.5f;
+    Vector3 moveDirection;
+    Vector3 lastDirection;
+    bool wallJumped;
     CharacterController cc;
 
     //Player Actions Public Variables
@@ -38,6 +32,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        Movement();
         if (weapon != null && !fireRateCooldown)
         {
 
@@ -68,7 +63,7 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
 
-        Movement();
+        
         LookAtMouse();
     }
 
@@ -90,93 +85,50 @@ public class PlayerController : MonoBehaviour
 
     void Movement()
     {
-        playerVector = Vector3.zero;
-        Vector3 input = Vector3.zero;
+        cc.Move(moveDirection * Time.deltaTime);
 
-        //get input
-        input.x = Input.GetAxis("Horizontal");
-        input = Vector3.ClampMagnitude(input, 1f);
 
-        if (cc.isGrounded)
+        if ((cc.collisionFlags & CollisionFlags.Below) != 0)
         {
-            //if grounded, get the basic input the player gives with the basic ground speed
-            playerVector = input;
-            playerVector *= groundSpeed;
+            wallJumped = false;
 
-        }
-        else
-        {
-            //If in air, the speed is set by airSpeed variable * the Vector 3 input
-            playerVector = input;
-            playerVector *= airSpeed;
-        }
-
-        //clamp the speed so it does not go over the ground speed level (no BHOP)
-        playerVector = Vector3.ClampMagnitude(playerVector, airSpeed);
-        playerVector *= Time.deltaTime;
-
-
-
-        verticalVelocity -= (gravityStrength * Time.deltaTime);
-
-        if (Input.GetButtonDown("Jump"))
-        {
-            //If touching wall, ability to double jump into an arc
-
-
-            if (canJump || cc.isGrounded)
+            moveDirection = new Vector3(Input.GetAxis("Horizontal") * speed, 0.0f);
+            moveDirection.y -= gravity * Time.deltaTime;
+            if (Input.GetButtonDown("Jump"))
             {
-                //basic jump
-                verticalVelocity = jumpForce;
+                moveDirection.y = jumpSpeed;
+
             }
-        }
 
-
-        if (Input.GetButton("Climb") && !climbedUp && onWall)
-        {
-
-            verticalVelocity = jumpForce;
-            StartCoroutine(wait());
-        }
-
-        if (cc.velocity.y < 0)
-        {
-            playerVector.y = verticalVelocity * Time.deltaTime * 1.8f;
         }
         else
         {
-            playerVector.y = verticalVelocity * Time.deltaTime;
-        }
-        //EI VITTU MITÄÄ HAJUA
-        CollisionFlags flags = cc.Move(playerVector);
-        velocity = playerVector / Time.deltaTime;
-        //use of flags to determine if character can jump or not
-        //if on ground
-        //set canjump to true
-        if ((flags & CollisionFlags.Below) != 0)
-        {
-            playerVector = Vector3.ProjectOnPlane(velocity, Vector3.up);
-            canJump = true;
+            if (wallJumped == false)
+            {
 
-            verticalVelocity = -3f;
+                if (Input.GetAxisRaw("Horizontal") == 0)
+                {
+                    moveDirection.x = lastDirection.x;
+                }
+                else
+                {
+                    moveDirection.x = Input.GetAxis("Horizontal") * speed;
+                }
+            }
 
-            onWall = false;
-        }
-        else if ((flags & CollisionFlags.Sides) != 0)
-        {
+            if (cc.velocity.y <= 0)
+            {
+                moveDirection.y -= gravity * Time.deltaTime * 1.8f;
+            }
+            else
+            {
+                moveDirection.y -= gravity * Time.deltaTime;
+            }
 
-            canJump = true;
-            onWall = true;
+
         }
-        else if ((flags & CollisionFlags.Above) != 0)
-        {
-            verticalVelocity = -1.5f;
-        }
-        else
-        {
-            canJump = false;
-            onWall = false;
-        }
+
+        lastDirection = cc.velocity;
     }
 
 
@@ -202,15 +154,15 @@ public class PlayerController : MonoBehaviour
 
         if (!cc.isGrounded && hit.normal.y < 0.1f)
         {
+            if (Input.GetAxisRaw("Horizontal") == 1 || Input.GetAxisRaw("Horizontal") == -1)
+                moveDirection.y *= 0.5f;
             if (Input.GetButtonDown("Jump"))
             {
-
-                //LISÄÄ TÄHÄN VITUNMOINEN FORCE
-                Debug.Log("HIT");
-                playerVector.y = jumpForce;
-                playerVector = Vector3.forward * airSpeed * hit.normal.x;
+                wallJumped = true;
+                StartCoroutine(wait());
+                moveDirection.y = jumpSpeed;
+                moveDirection.x = speed * hit.normal.x;
             }
-
         }
     }
 
@@ -224,9 +176,9 @@ public class PlayerController : MonoBehaviour
 
     IEnumerator wait()
     {
-        climbedUp = true;
-        yield return new WaitForSeconds(wallClimbCD);
-        climbedUp = false;
+        
+        yield return new WaitForSeconds(walljumpCD);
+        wallJumped = false;
     }
 
 
