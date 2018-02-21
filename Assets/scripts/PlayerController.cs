@@ -1,9 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Networking;
 
-public class PlayerController : NetworkBehaviour
+public class PlayerController : MonoBehaviour
 {
     //Player Movement Public Variables
     float speed = 15;
@@ -33,11 +32,7 @@ public class PlayerController : NetworkBehaviour
 
     void Update()
     {
-        if (!isLocalPlayer)
-        {
-            cam.enabled = false;
-            return;
-        }
+
         Movement();
         if (weapon != null && !fireRateCooldown)
         {
