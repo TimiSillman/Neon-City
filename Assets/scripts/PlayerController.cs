@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
     float speed = 15;
     float jumpSpeed = 20;
     float gravity = 30;
-    float walljumpCD = 0.5f;
+    float walljumpCD = 0.35f;
     Vector3 moveDirection;
     Vector3 lastDirection;
     bool wallJumped;

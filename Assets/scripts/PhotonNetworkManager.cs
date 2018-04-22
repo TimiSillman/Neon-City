@@ -61,6 +61,7 @@ public class PhotonNetworkManager : Photon.MonoBehaviour
 
         if (GameStarted && players < 2)
         {
+            PhotonNetwork.LeaveRoom();
             Application.LoadLevel(Application.loadedLevel);
         }
 
@@ -108,6 +109,11 @@ public class PhotonNetworkManager : Photon.MonoBehaviour
     {
         players = FindObjectsOfType<PlayerController>().Length;
         Debug.Log(players);
+    }
+
+    public void Exit()
+    {
+        Application.Quit();
     }
 }
 
