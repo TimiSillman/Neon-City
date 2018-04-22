@@ -22,9 +22,9 @@ public class PlayerStats : MonoBehaviour {
             PC = this.GetComponent<PlayerController>();
         }
 
-        
+        FindObjectOfType<AudioListener>().enabled = false;
 
-	}
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -73,6 +73,8 @@ public class PlayerStats : MonoBehaviour {
             ragdolled = true;
         }
 
+        FindObjectOfType<AudioListener>().enabled = true;
+        this.GetComponentInChildren<Camera>().enabled = false;
         lobbyCam.SetActive(true);
 
         PhotonNetwork.Destroy(this.gameObject);

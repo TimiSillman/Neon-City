@@ -3603,6 +3603,7 @@ GameObject:
   m_Component:
   - component: {fileID: 464555112}
   - component: {fileID: 464555111}
+  - component: {fileID: 464555113}
   m_Layer: 0
   m_Name: The Enigma TNG - Skylight
   m_TagString: Untagged
@@ -3703,6 +3704,13 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 34
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!81 &464555113
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 464555110}
+  m_Enabled: 1
 --- !u!4 &482019702 stripped
 Transform:
   m_PrefabParentObject: {fileID: 4905065945684358, guid: 5d63d4c3896f453428ce16e67c82e1c1,
@@ -4164,13 +4172,6 @@ GameObject:
   m_PrefabParentObject: {fileID: 1043067189602346, guid: 97e9f939d8166534aa9e03ace53cd4ce,
     type: 2}
   m_PrefabInternal: {fileID: 73684957}
---- !u!81 &574275877
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 574275872}
-  m_Enabled: 1
 --- !u!4 &581116712 stripped
 Transform:
   m_PrefabParentObject: {fileID: 4905065945684358, guid: 5d63d4c3896f453428ce16e67c82e1c1,
@@ -4649,7 +4650,7 @@ MeshCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 14
   m_SkinWidth: 0.01
   m_Mesh: {fileID: 4300000, guid: 8a00d3675b704b24a945c12edcc8c492, type: 3}
@@ -6528,7 +6529,7 @@ MeshCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Convex: 0
+  m_Convex: 1
   m_CookingOptions: 14
   m_SkinWidth: 0.01
   m_Mesh: {fileID: 4300000, guid: 8a00d3675b704b24a945c12edcc8c492, type: 3}
