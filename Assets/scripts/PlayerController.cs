@@ -53,6 +53,8 @@ public class PlayerController : MonoBehaviour
 
         }
 
+
+
         if (Input.GetKeyDown(KeyCode.E))
         {
             RemoveWeapon();
@@ -63,7 +65,7 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
 
-        
+
         LookAtMouse();
     }
 
@@ -136,11 +138,19 @@ public class PlayerController : MonoBehaviour
     {
         if (weaponAmmo > 0)
         {
+           if (this.GetComponentInChildren<WeaponDestroy>().gameObject.transform.Find("muzzle"))
+            {
+                this.GetComponentInChildren<WeaponDestroy>().gameObject.transform.Find("muzzle").transform.gameObject.SetActive(true);
+            }
+
             var bullet = Instantiate(weapon.bullet, firePoint.position, firePoint.rotation);
             bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * weapon.projectileSpeed;
 
             weaponAmmo -= 1;
             StartCoroutine(fireRateCD(weapon.fireRate));
+            StartCoroutine(Muzzle());
+
+
         } else
         {
             RemoveWeapon();
@@ -169,9 +179,19 @@ public class PlayerController : MonoBehaviour
 
     IEnumerator fireRateCD(float amount)
     {
+
         fireRateCooldown = true;
         yield return new WaitForSeconds(amount);
         fireRateCooldown = false;
+    }
+
+    IEnumerator Muzzle()
+    {
+        yield return new WaitForSeconds(0.05f);
+        if (this.GetComponentInChildren<WeaponDestroy>().gameObject.transform.Find("muzzle"))
+        {
+            this.GetComponentInChildren<WeaponDestroy>().gameObject.transform.Find("muzzle").transform.gameObject.SetActive(false);
+        }
     }
 
     IEnumerator wait()
@@ -198,9 +218,15 @@ public class PlayerController : MonoBehaviour
     {
         weapon = null;
         GameObject wep = GetComponentInChildren<WeaponDestroy>().gameObject;
-        wep.GetComponent<Rigidbody>().isKinematic = false;
-        wep.GetComponent<Rigidbody>().useGravity = true;
-        wep.GetComponent<BoxCollider>().enabled = true;
-        wep.transform.parent = null;
+        if (wep.tag != "Grenade")
+        {
+            wep.GetComponent<Rigidbody>().isKinematic = false;
+            wep.GetComponent<Rigidbody>().useGravity = true;
+            wep.GetComponent<BoxCollider>().enabled = true;
+            wep.transform.parent = null;
+        } else
+        {
+            Destroy(wep);
+        }
     }
 }

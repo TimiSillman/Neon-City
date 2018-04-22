@@ -16,7 +16,7 @@ public class Bullet : MonoBehaviour {
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag != "Bullet")
+        if (collision.gameObject.tag != "Bullet" || collision.gameObject.layer.Equals("Ground"))
         {
             Destroy(gameObject);
         }

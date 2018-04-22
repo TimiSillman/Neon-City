@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db896d392ac3c9247bfebb0e7eee90f5, type: 3}
+  m_Name: Grenade
+  m_EditorClassIdentifier: 
+  name: Grenade
+  mesh: {fileID: 123396, guid: d5c1322eebbecd545b3659dd4b94fc5e, type: 2}
+  damage: 0
+  ammo: 3
+  fireRate: 2
+  projectileSpeed: 20
+  bullet: {fileID: 123396, guid: d6c1b1c4c00b08c4d84c7adc9668a6fb, type: 2}
+  isRapidFire: 0

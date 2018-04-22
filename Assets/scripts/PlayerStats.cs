@@ -1,11 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 
 public class PlayerStats : MonoBehaviour {
 
-    public float heath = 100f;
+    public float health = 100f;
+    public GameObject Ragdoll;
 
+    bool isImmune = false;
+    bool ragdolled = false;
 
     PlayerController PC;
 
@@ -19,6 +23,53 @@ public class PlayerStats : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+
 	}
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "ElectricField" && !isImmune)
+        {
+            StartCoroutine(immune(3));
+            TakeDamage(20);
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if (other.gameObject.tag == "ElectricField" && !isImmune)
+        {
+            StartCoroutine(immune(3));
+            TakeDamage(20);
+        }
+    }
+
+    public void TakeDamage(int amount)
+    {
+        health -= amount;
+        if (health < 0)
+        {
+            Die();
+        }
+    }
+
+    public void Die()
+    {
+        if (!ragdolled)
+        {
+            Instantiate(Ragdoll, this.transform.position, this.transform.rotation);
+            ragdolled = true;
+        }
+
+        this.gameObject.transform.Find("Main Camera").parent = null;
+        
+        Destroy(this.gameObject);
+    }
+
+    IEnumerator immune(float time)
+    {
+        isImmune = true;
+        yield return new WaitForSeconds(time);
+        isImmune = false;
+    }
 }

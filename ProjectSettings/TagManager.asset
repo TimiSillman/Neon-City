@@ -8,6 +8,10 @@ TagManager:
   - Bullet
   - firepoint
   - Weapon
+  - ElectricField
+  - Grenade
+  - FxTemporaire
+  - muzzle
   layers:
   - Default
   - TransparentFX
@@ -18,7 +22,7 @@ TagManager:
   - 
   - 
   - Ground
-  - 
+  - Blur
   - 
   - 
   - 
