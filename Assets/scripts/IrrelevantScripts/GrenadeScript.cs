@@ -15,13 +15,17 @@ public class GrenadeScript : MonoBehaviour {
     // Use this for initialization
     void Start () {
         StartCoroutine(WaitForExplosion());
-	}
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.AddForce(transform.forward * 1500);
+        rb.AddForce(transform.up * 1000);
+    }
 
 
     IEnumerator WaitForExplosion()
     {
         yield return new WaitForSeconds(timeUntilExplode);
-        Instantiate(PS, transform.position, Quaternion.identity);
+        var ps = Instantiate(PS, transform.position, Quaternion.identity);
+        ps.gameObject.GetComponent<AudioSource>().Play();
         Explode();
     }
 
@@ -40,6 +44,7 @@ public class GrenadeScript : MonoBehaviour {
                 float effect = 1 - (proximity / radius);
                 int help = Mathf.RoundToInt((damage * effect) / 2);
                 player.GetComponent<PlayerStats>().TakeDamage(help);
+                player = null;
             }
 
             Rigidbody rb = col.GetComponent<Rigidbody>();

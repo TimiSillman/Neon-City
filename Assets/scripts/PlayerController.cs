@@ -23,16 +23,19 @@ public class PlayerController : MonoBehaviour
     //Player Actions Private Variables
     public bool fireRateCooldown = false;
 
+    private PhotonView photonView;
 
     // Use this for initialization
     void Start()
     {
+        photonView = GetComponent<PhotonView>();
         cc = this.GetComponent<CharacterController>();
     }
 
     void Update()
     {
         Movement();
+
         if (weapon != null && !fireRateCooldown)
         {
 
@@ -53,8 +56,6 @@ public class PlayerController : MonoBehaviour
 
         }
 
-
-
         if (Input.GetKeyDown(KeyCode.E))
         {
             RemoveWeapon();
@@ -64,7 +65,6 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-
 
         LookAtMouse();
     }
@@ -131,10 +131,11 @@ public class PlayerController : MonoBehaviour
         }
 
         lastDirection = cc.velocity;
+
     }
 
-
-    void Fire()
+    [PunRPC]
+    public void Fire()
     {
         if (weaponAmmo > 0)
         {
@@ -143,10 +144,19 @@ public class PlayerController : MonoBehaviour
                 this.GetComponentInChildren<WeaponDestroy>().gameObject.transform.Find("muzzle").transform.gameObject.SetActive(true);
             }
 
-            var bullet = Instantiate(weapon.bullet, firePoint.position, firePoint.rotation);
-            bullet.GetComponent<Rigidbody>().velocity = bullet.transform.forward * weapon.projectileSpeed;
+            string help = weapon.bullet.name;
+            Instantiate(Resources.Load(help), firePoint.position, firePoint.rotation);
+            
+            if (this.photonView.isMine)
+            {
+                this.photonView.RPC("Fire", PhotonTargets.OthersBuffered);
+            }
 
             weaponAmmo -= 1;
+            if (this.GetComponentInChildren<WeaponDestroy>().tag != "Grenade")
+            {
+                this.GetComponentInChildren<AudioSource>().Play();
+            }
             StartCoroutine(fireRateCD(weapon.fireRate));
             StartCoroutine(Muzzle());
 
@@ -229,4 +239,5 @@ public class PlayerController : MonoBehaviour
             Destroy(wep);
         }
     }
+
 }

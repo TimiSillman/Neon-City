@@ -26,7 +26,7 @@ public class ElectricFieldController : MonoBehaviour {
 
 		if (startRaising)
         {
-            Vector3 moveUp = new Vector3(0, 0.01f, 0);
+            Vector3 moveUp = new Vector3(0, 0.07f, 0);
             this.gameObject.transform.position += moveUp;
 
             if (currentStopPoint < StopPoints.Length)

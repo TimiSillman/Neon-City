@@ -11,6 +11,8 @@ public class PlayerStats : MonoBehaviour {
     bool isImmune = false;
     bool ragdolled = false;
 
+    public GameObject lobbyCam;
+
     PlayerController PC;
 
 	// Use this for initialization
@@ -19,12 +21,19 @@ public class PlayerStats : MonoBehaviour {
         {
             PC = this.GetComponent<PlayerController>();
         }
+
+        
+
 	}
 	
 	// Update is called once per frame
 	void Update () {
 
-	}
+        if (lobbyCam == null)
+        {
+            lobbyCam = FindObjectOfType<PhotonNetworkManager>().lobbyCamera;
+        }
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -46,11 +55,14 @@ public class PlayerStats : MonoBehaviour {
 
     public void TakeDamage(int amount)
     {
+
+
         health -= amount;
         if (health < 0)
         {
             Die();
         }
+       
     }
 
     public void Die()
@@ -61,9 +73,9 @@ public class PlayerStats : MonoBehaviour {
             ragdolled = true;
         }
 
-        this.gameObject.transform.Find("Main Camera").parent = null;
-        
-        Destroy(this.gameObject);
+        lobbyCam.SetActive(true);
+
+        PhotonNetwork.Destroy(this.gameObject);
     }
 
     IEnumerator immune(float time)
@@ -72,4 +84,16 @@ public class PlayerStats : MonoBehaviour {
         yield return new WaitForSeconds(time);
         isImmune = false;
     }
+    private void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.isWriting)
+        {
+            stream.SendNext(health);
+
+        } else if (stream.isReading)
+        {
+            health = (float)stream.ReceiveNext();
+        }
+    }
+
 }

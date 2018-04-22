@@ -7,6 +7,11 @@ public class WeaponPickup : Interactable {
     public Weapon weapon;
 
 
+    public void Start()
+    {
+        Instantiate(weapon.mesh, this.transform);
+    }
+
     public override void Interact()
     {
         base.Interact();
