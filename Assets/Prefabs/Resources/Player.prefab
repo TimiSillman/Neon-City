@@ -41,7 +41,6 @@ GameObject:
   - component: {fileID: 114470905600773584}
   - component: {fileID: 114069069425566690}
   - component: {fileID: 114342834287922194}
-  - component: {fileID: 54032117475044616}
   m_Layer: 0
   m_Name: Player
   m_TagString: player
@@ -304,8 +303,8 @@ GameObject:
   - component: {fileID: 4536563081043760}
   - component: {fileID: 20690604947446748}
   - component: {fileID: 124135245765771138}
-  - component: {fileID: 81784475011083188}
   - component: {fileID: 114615532495276840}
+  - component: {fileID: 81173586138887396}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1536,22 +1535,7 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1392458142125754}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!54 &54032117475044616
-Rigidbody:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1100019894333698}
-  serializedVersion: 2
-  m_Mass: 0.0000001
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 72
-  m_CollisionDetection: 0
---- !u!81 &81784475011083188
+--- !u!81 &81173586138887396
 AudioListener:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}

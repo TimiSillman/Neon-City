@@ -34,7 +34,10 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+
         Movement();
+
+        transform.position = new Vector3(transform.position.x, transform.position.y, 0);
 
         if (weapon != null && !fireRateCooldown)
         {
@@ -55,6 +58,8 @@ public class PlayerController : MonoBehaviour
             }
 
         }
+
+        
 
         if (Input.GetKeyDown(KeyCode.E))
         {
